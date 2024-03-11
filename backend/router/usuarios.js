@@ -14,7 +14,12 @@ class Router {
 
     start() {
       
+        this.router.get('/', (req,res) => {
+        res.json("Holaa")
 
+        })
+
+        
         this.router.get('/profesores/:id?', this.controladorUsuarios.obtenerProfes)
         this.router.get('/alumnos/:id?', this.controladorUsuarios.obtenerAlumnos)
         this.router.get('/admin/clases/:id', this.controladorUsuarios.obtenerInscriptos)
