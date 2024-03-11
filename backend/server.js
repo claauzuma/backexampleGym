@@ -21,6 +21,10 @@ class Server {
     this.app.use(express.urlencoded({ extended: true }))
     this.app.use(express.static('public'))
 
+    this.app.use('/', (req,res) => {
+      res.send("Hola papaa")
+    })
+    
     this.app.use('/api/usuarios', new RouterUsuarios(this.persistencia).start())
     this.app.use('/api/rutinas', new RouterRutinas(this.persistencia).start())
     this.app.use('/api/clases', new RouterClases(this.persistencia).start())
