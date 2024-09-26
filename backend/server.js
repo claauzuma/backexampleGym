@@ -5,56 +5,54 @@ import RouterClases from './router/clases.js'
 import CnxMongoDB from './model/DBMongo.js'
 import cors from 'cors'
 
-
-
 class Server {
-  constructor(port,persistencia) {
+  constructor(port, persistencia) {
     this.port = port
     this.persistencia = persistencia
     this.app = express()
     this.server = null
   }
 
-
   async start() {
+    // Configura CORS
+    this.app.use(cors({
+      origin: 'http://localhost:5173',  // Cambia a la URL correcta que deseas permitir
+      credentials: true
+    }));
+
+    // Middleware de Express
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: true }))
     this.app.use(express.static('public'))
 
-    this.app.use('/', (req,res) => {
-      res.send("Hola papaa")
-    })
-    
+    // Rutas de la API
     this.app.use('/api/usuarios', new RouterUsuarios(this.persistencia).start())
     this.app.use('/api/rutinas', new RouterRutinas(this.persistencia).start())
     this.app.use('/api/clases', new RouterClases(this.persistencia).start())
-    this.app.use(cors())
 
-    if (this.persistencia == 'MONGODB') {
-    await CnxMongoDB.conectar()
+    // Conexión a MongoDB si se selecciona MONGODB como persistencia
+    if (this.persistencia === 'MONGODB') {
+      await CnxMongoDB.conectar()
     }
 
+    // Inicia el servidor
     const PORT = this.port
     this.server = this.app.listen(PORT, () => console.log(`Servidor express escuchando en http://localhost:${PORT}`))
     this.server.on('error', error => console.log(`Error en servidor: ${error.message}`))
-  
+
     return this.app
   }
 
-  async stop(){
-    if(this.server){
-        this.server.close()
-        await CnxMongoDB.desconectar()
-        this.server = null
-
+  async stop() {
+    if (this.server) {
+      this.server.close()
+      await CnxMongoDB.desconectar()
+      this.server = null
     }
-}
-
+  }
 }
 
 export default Server;
-
-
 
 
 

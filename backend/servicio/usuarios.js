@@ -77,6 +77,7 @@ class Servicio {
         const usuarios = await this.model.obtenerUsuarios()
         const userDb = usuarios.find(u => u.email == usuarioIngresado.email && u.password == usuarioIngresado.password)
         if (userDb) {
+            console.log("Existe un usuario chje y lo logeamosss")
             const token = jsonwebtoken.sign({
                 email: userDb.email, rol: userDb.rol, plan: userDb.plan,
                 id: userDb.id

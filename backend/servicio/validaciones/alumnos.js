@@ -7,7 +7,7 @@ export const validarAlumno = alumno => {
         apellido: Joi.string().regex(/^[a-zA-Z0-9 ]+$/).required(),
         dni: Joi.string().regex(/^[a-zA-Z0-9 ]+$/).required(),
         email: Joi.string().email().required(), 
-        contraseña: Joi.string().regex(/^[a-zA-Z0-9 ]+$/).required(),
+        password: Joi.string().regex(/^[a-zA-Z0-9 ]+$/).required(),
         ingreso: Joi.string().regex(/^[a-zA-Z0-9 ]+$/).required(),
         plan: Joi.string().regex(/^[a-zA-Z0-9 ]+$/).required(),
       
