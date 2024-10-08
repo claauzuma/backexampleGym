@@ -28,11 +28,16 @@ class ControladorUsuarios {
 
 
     logearUsuario = async (req, res) => {
+        console.log("Intentamos logear al usuario")
         if (req.body) {
-            const usuario = req.body
-            const usuarioLogeado = await this.servicio.logearUsuario(usuario)
-            res.json(usuarioLogeado)
-            //res.redirect('/')
+
+            const {email} = req.body
+            const {password} = req.body
+            console.log(email, password)
+            const usuarioLogeado = await this.servicio.logearUsuario(email, password)
+            const {password: _, ...publicUser} = usuarioLogeado;
+            res.json(publicUser)
+
         }
         else {
             res.status(400).json({ message: 'error' })

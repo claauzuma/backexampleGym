@@ -73,10 +73,14 @@ class Servicio {
     }   
 
 
-    logearUsuario = async usuarioIngresado => {
+    logearUsuario = async (email, password) => {
+        console.log("Intentamos logear al usuario capa de servicios" + email + "" + password)
         const usuarios = await this.model.obtenerUsuarios()
-        const userDb = usuarios.find(u => u.email == usuarioIngresado.email && u.password == usuarioIngresado.password)
+        console.log("Encontramos a este usuario " + usuarios[0].email + " y el password " + usuarios[0].password)
+        const userDb = usuarios.find(u => u.email == email && u.password == password)
+        console.log(userDb.email)
         if (userDb) {
+            console.log("Encontramos al usuariiooo")
             console.log("Existe un usuario chje y lo logeamosss")
             const token = jsonwebtoken.sign({
                 email: userDb.email, rol: userDb.rol, plan: userDb.plan,
