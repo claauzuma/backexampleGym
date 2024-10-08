@@ -91,54 +91,59 @@ class Servicio {
 
     }   
 
-    agregarAlumno = async alumno => {
-        const res = validarAlumno(alumno)
-        if (res.result) {
-            const usuarios = await this.obtenerUsuarios();
-            const usuarioExistente = usuarios.find(u => u.email == alumno.email)
-            if (usuarioExistente == null) {
-                console.log("El email no esta repetido asi que todo ok")
-                alumno.rol = "alumno"
-                alumno.tieneRutina = false;
-                alumno.clasesInscriptas =[]
+    agregarAlumno = async (alumno) => {
+        try {
 
-                const alumnoAgregado = await this.model.guardarUsuario(alumno)
-                return alumnoAgregado
-
+            const res = await validarAlumno(alumno);
+            
+            if (res.result) {
+                const usuarios = await this.obtenerUsuarios();
+                const usuarioExistente = usuarios.find(u => u.email === alumno.email);
+    
+                if (!usuarioExistente) {
+                    console.log("El email no está repetido, así que todo ok");
+    
+        
+                    alumno.rol = "alumno";
+                    alumno.tieneRutina = false;
+                    alumno.clasesInscriptas = [];
+    
+    
+                    const alumnoAgregado = await this.model.guardarUsuario(alumno);
+                    return alumnoAgregado;
+                } else {
+                    console.log("El email ya existe");
+                    throw new Error("El email ya está en uso");
+                }
+            } else {
+                console.log(res.error);
+                throw res.error;
             }
-            else {
-                console.log("El mail ya existe")
+        } catch (error) {
+
+            console.error("Error al agregar alumno:", error);
+            throw error;
+        }
+    };
+    agregarProfesor = async (profesor) => {
+        try {
+            const res = await validarProfesor(profesor); 
+            if (res.result) {
+                const usuarios = this.obtenerUsuarios();
+                profesor.id = parseInt(usuarios[usuarios.length - 1]?.id || 0) + 1;
+                profesor.rol = "profe";
+    
+                const profeAgregado = await this.model.guardarUsuario(profesor);
+                return profeAgregado;
+            } else {
+                console.log(res.error);
+                throw new Error(res.error.details[0].message); 
             }
-
-
-
+        } catch (error) {
+            console.error('Error al agregar profesor:', error);
+            throw error; 
         }
-        else {
-            console.log(res.error)
-            throw res.error
-
-        }
-
-    }
-
-    agregarProfesor = async profesor => {
-        const res = validarProfesor(profesor)
-        if (res.result) {
-            const usuarios = this.obtenerUsuarios();
-            profesor.id = parseInt(usuarios[usuarios.length - 1]?.id || 0) + 1;
-            profesor.rol = "profe"
-
-            const profeAgregado = await this.model.guardarUsuario(profesor)
-            return profeAgregado
-
-        }
-        else {
-            console.log(res.error)
-            throw res.error
-
-        }
-
-    }
+    };
 
 
     inscribirAClase = async (idClase, usuario) => {

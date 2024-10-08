@@ -59,7 +59,9 @@ class Servicio {
     }  
 
     modificarRutina = async (id,rutina) => {
+        console.log("Antes de actualizar la rutina en el model")
         const rutinaActualizada = await this.model.actualizarRutina(id,rutina)
+        console.log("Actualizamos la rutina y quedó asi : " + rutinaActualizada)
         return rutinaActualizada
     }   
 

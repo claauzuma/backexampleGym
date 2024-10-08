@@ -33,6 +33,7 @@ class ControladorRutinas {
     }
 
     modificarRutina = async (req,res) => {
+        res.header('Access-Control-Allow-Origin', '*');
         const { id } = req.params
         const rutina = req.body
         const rutinaModificada = await this.servicio.modificarRutina(id,rutina)
