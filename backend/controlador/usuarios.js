@@ -6,7 +6,12 @@ class ControladorUsuarios {
         this.servicio = new Servicio(persistencia)
     }
 
-    
+    obtenerAdmins = async (req,res) => {
+        const { id } = req.params
+        const admins = await this.servicio.obtenerAdmins(id)
+        res.json(admins)
+    }
+
 
     obtenerProfes = async (req,res) => {
         const { id } = req.params
@@ -26,21 +31,50 @@ class ControladorUsuarios {
         res.json(inscriptos)
     }
 
-
     logearUsuario = async (req, res) => {
-        console.log("Intentamos logear al usuario")
-        if (req.body) {
+        try {
+            console.log("Intentamos logear al usuario");
+    
+            const { email, password } = req.body;
+            if (!email || !password) {
+                return res.status(400).json({ message: 'Email y contraseña son requeridos' });
+            }
+    
+            console.log(email, password);
+    
+            // Llama al servicio para logear al usuario
+            const token = await this.servicio.logearUsuario(email, password);
+    
+            if (token) {
+                // Configura la cookie con el token
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production', // Asegúrate de que sea seguro en producción
+                    sameSite: 'strict', 
+                    maxAge: 60 * 60 * 1000 // 1 hora
+                });
+             
+                return res.json({ token }); // Devuelve solo el token
+    
+            } else {
+                return res.status(401).json({ message: 'Credenciales incorrectas' });
+            }
+        } catch (error) {
+            console.error("Error al logear al usuario:", error);
+            return res.status(500).json({ message: 'Error en el servidor' });
+        }
+    };
 
-            const {email} = req.body
-            const {password} = req.body
-            console.log(email, password)
-            const usuarioLogeado = await this.servicio.logearUsuario(email, password)
-            const {password: _, ...publicUser} = usuarioLogeado;
-            res.json(publicUser)
+
+    agregarAdmin = async (req, res) => {
+        if (req.body) {
+            const admin = req.body
+            const adminAgregado = await this.servicio.agregarAdmin(admin)
+            res.json(adminAgregado)
 
         }
         else {
-            res.status(400).json({ message: 'error' })
+            res.status(404).json({ message: 'falta el body' })
         }
 
     }
@@ -74,9 +108,8 @@ class ControladorUsuarios {
 
     inscribirAClase = async (req, res) => {
         if (req.body) {
-            const { id: idClase } = req.params
-            const usuario = req.body;
-            const usuarioInscripto = await this.servicio.inscribirAClase(idClase,usuario)
+            const { idClase, idUsuario } = req.params
+            const usuarioInscripto = await this.servicio.inscribirAClase(idClase,idUsuario)
             res.json(usuarioInscripto)
         }
         else 
@@ -87,11 +120,11 @@ class ControladorUsuarios {
     }
 
     desuscribirseDeClase = async (req, res) => {
-        if (req.body && req.params) {
-            const { id: idClase } = req.params
-            const usuario = req.body;
+        if (req.params.idClase && req.params.idAlumno) {
+            
+            const {idClase, idAlumno } = req.params
             console.log("Vamos al servicio para desuscribirnos de la clase")
-            const usuarioDesuscripto = await this.servicio.desuscribirseDeClase(idClase,usuario)
+            const usuarioDesuscripto = await this.servicio.desuscribirseDeClase(idClase,idAlumno)
 
             res.json(usuarioDesuscripto)
         }
@@ -102,12 +135,20 @@ class ControladorUsuarios {
 
     }
 
-
-    modificarUsuario = async (req,res) => {
-        const { id } = req.params
-        const usuario = req.body
-        const usuarioModificado = await this.servicio.modificarUsuario(id, usuario)
-        res.json(usuarioModificado)
+    modificarUsuario = async (req, res) => {
+        const { id } = req.params;  
+        const usuario = req.body;   
+    
+        if (usuario._id) {
+            delete usuario._id;
+        }
+    
+        try {
+            const usuarioModificado = await this.servicio.modificarUsuario(id, usuario);
+            res.status(200).json(usuarioModificado);
+        } catch (error) {
+            res.status(500).json({ message: "Error al modificar el usuario", error });
+        }
     }
 
     modificarEmail = async (req,res) => {
@@ -132,11 +173,7 @@ class ControladorUsuarios {
         res.json(usuarioBorrado)
     }
 
-    desuscribirseDeClase = async (req,res) => {
-        const { id } = req.params
-        const estado = await this.servicio.borrarUsuario(id)
-        res.json(estado)
-    }
+
 
 
 }

@@ -4,10 +4,11 @@ export const validarClase = clase => {
 
     const claseSchema = Joi.object({
 
-        descripcion: Joi.string().alphanum().required(),
-        nombreProfesor: Joi.string().alphanum().required(),
+        descripcion: Joi.string().pattern(/^[a-zA-Z0-9\s]+$/).required(),
+        nombreProfesor: Joi.string().pattern(/^[a-zA-Z0-9\s]+$/).required(),
         emailProfesor: Joi.string().email().required(),
-        horario: Joi.number().integer().required(),
+        horaArranque: Joi.string().pattern(/^([01]\d|2[0-3]):([0-5]\d)$/).required(),  // Formato HH:mm
+        horaFinalizacion: Joi.string().pattern(/^([01]\d|2[0-3]):([0-5]\d)$/).required(), // Formato HH:mm
         capacidad: Joi.number().integer().required(),
        
     });

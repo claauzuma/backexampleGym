@@ -24,9 +24,11 @@ class Servicio {
         try {
             if (res.result) {
                 const usuarios = await this.modelUsuarios.obtenerUsuarios();
+
                 const profesorExistente = usuarios.find(u => u.rol == "profe" && u.nombre == clase.nombreProfesor && u.email == clase.emailProfesor)
                 if (profesorExistente != null) {
                     console.log("joya, el profesor existe")
+                    clase.alumnosInscriptos = []
                     clase.anotados = 0;
 
                     const claseAgregada = await this.model.guardarClase(clase)
@@ -56,6 +58,11 @@ class Servicio {
         }
 
 
+
+    }
+    modificarClase = async (id, clase) => {
+    const claseModificada = this.model.actualizarClase(id,clase);
+    return claseModificada;
 
     }
 

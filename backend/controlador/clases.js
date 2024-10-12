@@ -27,6 +27,18 @@ class ControladorClases {
 
     }
 
+    modificarClase = async (req,res) => {
+    const {id} = req.params;
+    const clase = req.body;
+
+    if (clase._id) {
+        delete clase._id;
+    }
+    const claseModificada = await this.servicio.modificarClase(id,clase);
+    res.json(claseModificada)
+
+    }
+
     borrarClase = async (req,res) => {
         const { id } = req.params
         const claseBorrada = await this.servicio.borrarClase(id)

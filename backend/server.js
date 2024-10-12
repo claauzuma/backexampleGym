@@ -4,6 +4,7 @@ import RouterRutinas from './router/rutinas.js'
 import RouterClases from './router/clases.js'
 import CnxMongoDB from './model/DBMongo.js'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 
 class Server {
   constructor(port, persistencia) {
@@ -17,34 +18,42 @@ class Server {
 
 
     this.app.use(express.json())
-    this.app.use(express.urlencoded({ extended: true }))
-    this.app.use(cors({
-      origin: (origin,callback) => {
-        const ACCEPTED_ORIGINS = [
-          'http://localhost:5173'
-        ]
+    this.app.use(cookieParser())
 
-        if(ACCEPTED_ORIGINS.includes(origin)) {
-          return callback(null,true)
-        }
-      if(!origin) {
-        return callback(null,true)
+
+    this.app.use((req,res,next)=> {
+      const token = req.cookies.access_token
+      let data = null
+      req.session = {user : null}
+      try {
+        data = jwt.verify(token, "CLAVE_SECRETA")
+        req.session.user = data;
       }
+      catch {}
+      next()
 
-      return callback(new Error('Not allowed by '))
+    })
+    
 
+    this.app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      
+      // Agrega esta condición para manejar el preflight request de CORS
+      if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
       }
-    }
+      next();
+    });
+    
 
-    ))
-
-
-    this.app.use(express.static('public'))
+    this.app.use(express.static('public'));
 
 
     
 
-    // Rutas de la API
     this.app.get('/', (req,res) => {
       res.json({message: "Hola mundo "})
     })
