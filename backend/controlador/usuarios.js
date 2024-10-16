@@ -1,61 +1,74 @@
-import Servicio from '../servicio/usuarios.js'
-
+import Servicio from '../servicio/usuarios.js';
 
 class ControladorUsuarios {
     constructor(persistencia) {
-        this.servicio = new Servicio(persistencia)
+        this.servicio = new Servicio(persistencia);
     }
 
-    obtenerAdmins = async (req,res) => {
-        const { id } = req.params
-        const admins = await this.servicio.obtenerAdmins(id)
-        res.json(admins)
+    obtenerAdmins = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const admins = await this.servicio.obtenerAdmins(id);
+            res.json(admins);
+        } catch (error) {
+            console.error("Error al obtener administradores:", error);
+            res.status(500).json({ message: 'Error al obtener administradores' });
+        }
     }
 
-
-    obtenerProfes = async (req,res) => {
-        const { id } = req.params
-        const profes = await this.servicio.obtenerProfes(id)
-        res.json(profes)
+    obtenerProfes = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const profes = await this.servicio.obtenerProfes(id);
+            res.json(profes);
+        } catch (error) {
+            console.error("Error al obtener profesores:", error);
+            res.status(500).json({ message: 'Error al obtener profesores' });
+        }
     }
 
-    obtenerAlumnos = async (req,res) => {
-        const { id } = req.params
-        const alumnos = await this.servicio.obtenerAlumnos(id)
-        res.json(alumnos)
+    obtenerAlumnos = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const alumnos = await this.servicio.obtenerAlumnos(id);
+            res.json(alumnos);
+        } catch (error) {
+            console.error("Error al obtener alumnos:", error);
+            res.status(500).json({ message: 'Error al obtener alumnos' });
+        }
     }
 
-    obtenerInscriptos = async (req,res) => {
-        const { id } = req.params
-        const inscriptos = await this.servicio.obtenerInscriptos(id)
-        res.json(inscriptos)
+    obtenerInscriptos = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const inscriptos = await this.servicio.obtenerInscriptos(id);
+            res.json(inscriptos);
+        } catch (error) {
+            console.error("Error al obtener inscriptos:", error);
+            res.status(500).json({ message: 'Error al obtener inscriptos' });
+        }
     }
 
     logearUsuario = async (req, res) => {
         try {
             console.log("Intentamos logear al usuario");
-    
             const { email, password } = req.body;
+
             if (!email || !password) {
                 return res.status(400).json({ message: 'Email y contraseña son requeridos' });
             }
-    
+
             console.log(email, password);
-    
-            // Llama al servicio para logear al usuario
             const token = await this.servicio.logearUsuario(email, password);
-    
+
             if (token) {
-                // Configura la cookie con el token
                 res.cookie('token', token, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production', // Asegúrate de que sea seguro en producción
-                    sameSite: 'strict', 
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
                     maxAge: 60 * 60 * 1000 // 1 hora
                 });
-             
-                return res.json({ token }); // Devuelve solo el token
-    
+                return res.json({ token });
             } else {
                 return res.status(401).json({ message: 'Credenciales incorrectas' });
             }
@@ -65,117 +78,133 @@ class ControladorUsuarios {
         }
     };
 
-
     agregarAdmin = async (req, res) => {
-        if (req.body) {
-            const admin = req.body
-            const adminAgregado = await this.servicio.agregarAdmin(admin)
-            res.json(adminAgregado)
-
+        try {
+            if (req.body) {
+                const admin = req.body;
+                const adminAgregado = await this.servicio.agregarAdmin(admin);
+                res.json(adminAgregado);
+            } else {
+                res.status(404).json({ message: 'Falta el body' });
+            }
+        } catch (error) {
+            console.error("Error al agregar admin:", error);
+            res.status(500).json({ message: 'Error al agregar admin' });
         }
-        else {
-            res.status(404).json({ message: 'falta el body' })
-        }
-
     }
-
 
     agregarAlumno = async (req, res) => {
-        if (req.body) {
-            const alumno = req.body
-            const alumnoAgregado = await this.servicio.agregarAlumno(alumno)
-            res.json(alumnoAgregado)
-
-        }
-        else {
-            res.status(404).json({ message: 'falta el body' })
-        }
-
-    }
-
-    agregarProfesor = async (req,res) => {
-        if (req.body) {
-        const profesor = req.body
-        const profesorAgregado = await this.servicio.agregarProfesor(profesor)
-        res.json(profesorAgregado)
-        }
-        else {
-          res.status(404).json({ message: 'falta el body' })
-
+        try {
+            if (req.body) {
+                const alumno = req.body;
+                const alumnoAgregado = await this.servicio.agregarAlumno(alumno);
+                res.json(alumnoAgregado);
+            } else {
+                res.status(404).json({ message: 'Falta el body' });
+            }
+        } catch (error) {
+            console.error("Error al agregar alumno:", error);
+            res.status(500).json({ message: 'Error al agregar alumno' });
         }
     }
 
+    agregarProfesor = async (req, res) => {
+        try {
+            if (req.body) {
+                const profesor = req.body;
+                const profesorAgregado = await this.servicio.agregarProfesor(profesor);
+                res.json(profesorAgregado);
+            } else {
+                res.status(404).json({ message: 'Falta el body' });
+            }
+        } catch (error) {
+            console.error("Error al agregar profesor:", error);
+            res.status(500).json({ message: 'Error al agregar profesor' });
+        }
+    }
 
     inscribirAClase = async (req, res) => {
-        if (req.body) {
-            const { idClase, idUsuario } = req.params
-            const usuarioInscripto = await this.servicio.inscribirAClase(idClase,idUsuario)
-            res.json(usuarioInscripto)
+        try {
+            if (req.body) {
+                const { idClase, idUsuario } = req.params;
+                const usuarioInscripto = await this.servicio.inscribirAClase(idClase, idUsuario);
+                return res.json(usuarioInscripto);
+            } else {
+                return res.status(400).json({ message: 'Error: Datos no proporcionados' });
+            }
+        } catch (error) {
+            console.error("Error al inscribir al usuario:", error.message);
+            return res.status(500).json({ message: `Error al inscribir al usuario: ${error.message}` });
         }
-        else 
-        {
-            res.status(400).json({message:'error'})
-        }
-
-    }
+    };
 
     desuscribirseDeClase = async (req, res) => {
-        if (req.params.idClase && req.params.idAlumno) {
-            
-            const {idClase, idAlumno } = req.params
-            console.log("Vamos al servicio para desuscribirnos de la clase")
-            const usuarioDesuscripto = await this.servicio.desuscribirseDeClase(idClase,idAlumno)
-
-            res.json(usuarioDesuscripto)
+        try {
+            if (req.params.idClase && req.params.idAlumno) {
+                const { idClase, idAlumno } = req.params;
+                console.log("Vamos al servicio para desuscribirnos de la clase");
+                const usuarioDesuscripto = await this.servicio.desuscribirseDeClase(idClase, idAlumno);
+                res.json(usuarioDesuscripto);
+            } else {
+                res.status(400).json({ message: 'Error: Parámetros no proporcionados' });
+            }
+        } catch (error) {
+            console.error("Error al desuscribirse de la clase:", error);
+            res.status(500).json({ message: 'Error al desuscribirse de la clase' });
         }
-        else 
-        {
-            res.status(400).json({message:'error'})
-        }
-
     }
 
     modificarUsuario = async (req, res) => {
-        const { id } = req.params;  
-        const usuario = req.body;   
-    
-        if (usuario._id) {
-            delete usuario._id;
-        }
-    
         try {
+            const { id } = req.params;
+            const usuario = req.body;
+
+            if (usuario._id) {
+                delete usuario._id;
+            }
+
             const usuarioModificado = await this.servicio.modificarUsuario(id, usuario);
             res.status(200).json(usuarioModificado);
         } catch (error) {
+            console.error("Error al modificar el usuario:", error);
             res.status(500).json({ message: "Error al modificar el usuario", error });
         }
     }
 
-    modificarEmail = async (req,res) => {
-        const { id } = req.params
-        const objeto = req.body
-        const usuarioActualizado = await this.servicio.modificarEmail(id, objeto)
-        res.json(usuarioActualizado)
+    modificarEmail = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const objeto = req.body;
+            const usuarioActualizado = await this.servicio.modificarEmail(id, objeto);
+            res.json(usuarioActualizado);
+        } catch (error) {
+            console.error("Error al modificar el email:", error);
+            res.status(500).json({ message: 'Error al modificar el email' });
+        }
     }
 
-    modificarContraseña = async (req,res) => {
-        const { id } = req.params
-        const objeto = req.body
-        const usuarioActualizado = await this.servicio.modificarContraseña(id, objeto)
-        res.json(usuarioActualizado)
+    modificarContraseña = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const objeto = req.body;
+            const usuarioActualizado = await this.servicio.modificarContraseña(id, objeto);
+            res.json(usuarioActualizado);
+        } catch (error) {
+            console.error("Error al modificar la contraseña:", error);
+            res.status(500).json({ message: 'Error al modificar la contraseña' });
+        }
     }
 
-
-
-    borrarUsuario = async (req,res) => {
-        const { id } = req.params
-        const usuarioBorrado = await this.servicio.borrarUsuario(id)
-        res.json(usuarioBorrado)
+    borrarUsuario = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const usuarioBorrado = await this.servicio.borrarUsuario(id);
+            res.json(usuarioBorrado);
+        } catch (error) {
+            console.error("Error al borrar el usuario:", error);
+            res.status(500).json({ message: 'Error al borrar el usuario' });
+        }
     }
-
-
-
-
 }
 
-export default ControladorUsuarios
+export default ControladorUsuarios;
