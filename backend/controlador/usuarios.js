@@ -98,15 +98,20 @@ class ControladorUsuarios {
             if (req.body) {
                 const alumno = req.body;
                 const alumnoAgregado = await this.servicio.agregarAlumno(alumno);
-                res.json(alumnoAgregado);
+                res.status(201).json(alumnoAgregado); // Respuesta exitosa con el código 201 (Created)
             } else {
-                res.status(404).json({ message: 'Falta el body' });
+                res.status(400).json({ message: 'Falta el body' }); // Respuesta cuando falta el body
             }
         } catch (error) {
-            console.error("Error al agregar alumno:", error);
-            res.status(500).json({ message: 'Error al agregar alumno' });
+            console.error("Error al agregar alumno:", error.message);
+    
+            if (error.message === "El email ya está en uso") {
+                res.status(409).json({ message: error.message }); // Código 409: Conflicto, para email duplicado
+            } else {
+                res.status(500).json({ message: 'Error al agregar alumno' }); // Código 500: Error genérico del servidor
+            }
         }
-    }
+    };
 
     agregarProfesor = async (req, res) => {
         try {

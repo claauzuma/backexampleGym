@@ -29,11 +29,13 @@ export const validarAlumno = async (alumno) => {
                 "string.min": "La contraseña debe tener al menos 6 caracteres.",
                 "string.empty": "La contraseña es requerida."
             }),
-        ingreso: Joi.date().iso().required()
+
+            pago: Joi.string().valid('diario', 'mensual', 'quincenal', 'bimestral', 'trimestral', 'semestral', 'anual').required()
             .messages({
-                "date.format": "La fecha de ingreso debe estar en formato ISO (YYYY-MM-DD).",
-                "string.empty": "La fecha de ingreso es requerida."
+                "any.only": "El pago debe ser uno de los siguientes: diario, mensual, quincenal, bimestral, trimestral, semestral o anual.",
+                "string.empty": "El tipo de pago es requerido."
             }),
+  
         plan: Joi.string().valid('basico', 'oro', 'platino').required()
             .messages({
                 "any.only": "El plan debe ser uno de los siguientes: basico, oro, platino.",

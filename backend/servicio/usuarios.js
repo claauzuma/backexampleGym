@@ -153,9 +153,8 @@ class Servicio {
     
     agregarAlumno = async (alumno) => {
         try {
-
             const res = await validarAlumno(alumno);
-            
+    
             if (res.result) {
                 const usuarios = await this.obtenerUsuarios();
                 const usuarioExistente = usuarios.find(u => u.email === alumno.email);
@@ -163,11 +162,45 @@ class Servicio {
                 if (!usuarioExistente) {
                     console.log("El email no está repetido, así que todo ok");
     
-        
+                    const today = new Date(); 
+                    alumno.ingreso = today;
+    
                     alumno.rol = "alumno";
                     alumno.tieneRutina = false;
                     alumno.clasesInscriptas = [];
+                    alumno.estado = "Habilitado";
     
+                    // Calcular el vencimiento basado en el tipo de pago
+                    const vencimiento = new Date(today); // Copia la fecha de ingreso
+                    switch (alumno.pago.toLowerCase()) {
+                        case "diario":
+                            vencimiento.setDate(today.getDate() + 1);
+                            break;
+                        case "quincenal":
+                            vencimiento.setDate(today.getDate() + 15);
+                            break;
+                        case "mensual":
+                            vencimiento.setMonth(today.getMonth() + 1);
+                            break;
+                        case "bimestral":
+                            vencimiento.setMonth(today.getMonth() + 2);
+                            break;
+                        case "trimestral":
+                            vencimiento.setMonth(today.getMonth() + 3);
+                            break;
+                        case "semestral":
+                            vencimiento.setMonth(today.getMonth() + 6);
+                            break;
+                        case "anual":
+                            vencimiento.setFullYear(today.getFullYear() + 1);
+                            break;
+                        default:
+                            throw new Error("Tipo de pago no válido");
+                    }
+    
+                    alumno.vencimiento = vencimiento;
+
+                    console.log("LA FECHA DE VENCIMIENTO ES " + alumno.vencimiento)
     
                     const alumnoAgregado = await this.model.guardarUsuario(alumno);
                     return alumnoAgregado;
@@ -180,11 +213,12 @@ class Servicio {
                 throw res.error;
             }
         } catch (error) {
-
             console.error("Error al agregar alumno:", error);
             throw error;
         }
     };
+
+    
     agregarProfesor = async (profesor) => {
         try {
             const res = await validarProfesor(profesor); 
@@ -214,13 +248,15 @@ class Servicio {
                 throw new Error('Usuario no encontrado');
             }
     
-            let claseDeUsuario = "sinClase";
-    
-      
+           
+            console.log("PROCEDEMOS A BUSCAR SI ESTAMOS INSCRIPTO A LA CLASE")
             if (usuario.clasesInscriptas.length > 0) {
+                console.log("El usuario esta inscripto en al menos una clase")
+                let claseDeUsuario = "sinClase";
                 claseDeUsuario = usuario.clasesInscriptas.find(IDclaseInscripta => IDclaseInscripta == idClase);
-                console.log(claseDeUsuario);
-                if (claseDeUsuario !== "sinClase") {
+                console.log("La clase encontrada del usuario es " + claseDeUsuario);
+               
+                if (claseDeUsuario !== undefined) {
                     throw new Error('Error, el alumno ya está inscripto a dicha clase');
                 } else {
                     console.log("Perfecto, el usuario no está inscripto a esa clase");
@@ -287,8 +323,11 @@ class Servicio {
           
             usuario.clasesInscriptas = usuario.clasesInscriptas.filter(IDclaseInscripta => IDclaseInscripta !== idClase);
             
+            if(clase.anotados > 0) {
+                clase.anotados--;
+
+            }
             
-            clase.anotados--;
             clase.alumnosInscriptos = clase.alumnosInscriptos.filter(id => id !== idUsuario);
     
             await this.modelClases.actualizarClase(clase._id, clase);
